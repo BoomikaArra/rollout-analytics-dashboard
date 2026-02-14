@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="section-head">
+    <h2>Dashboard</h2>
+    <p class="muted">Filter and review funnel health, lift, and anomalies.</p>
+  </div>
+
+  <form class="filters" method="get" action="{{ url_for('dashboard') }}">
+    <div class="field">
+      <label>Variant</label>
+      <select name="variant">
+        {% for v in variants %}
+          <option value="{{ v }}" {% if selected.variant == v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Channel</label>
+      <select name="channel">
+        {% for c in channels %}
+          <option value="{{ c }}" {% if selected.channel == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Segment</label>
+      <select name="segment">
+        {% for s in segments %}
+          <option value="{{ s }}" {% if selected.segment == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Start date</label>
+      <input name="start_date" type="date" value="{{ selected.start_date }}">
+    </div>
+
+    <div class="field">
+      <label>End date</label>
+      <input name="end_date" type="date" value="{{ selected.end_date }}">
+    </div>
+
+    <div class="field actions">
+      <button class="btn" type="submit">Apply</button>
+      <a class="btn ghost" href="{{ url_for('dashboard') }}">Reset</a>
+    </div>
+  </form>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Impressions</div><div class="kpi-value">{{ funnel.counts.impression }}</div></div>
+    <div class="kpi"><div class="kpi-label">Clicks</div><div class="kpi-value">{{ funnel.counts.click }}</div></div>
+    <div class="kpi"><div class="kpi-label">Applies</div><div class="kpi-value">{{ funnel.counts.apply }}</div></div>
+    <div class="kpi"><div class="kpi-label">Approves</div><div class="kpi-value">{{ funnel.counts.approve }}</div></div>
+  </div>
+
+  <div class="card-grid two">
+    <div class="card">
+      <h3>Funnel conversion rates</h3>
+      <ul class="clean">
+        <li><strong>Click / Impression:</strong> {{ (funnel.rates.click_over_impression * 100) | round(2) }}%</li>
+        <li><strong>Apply / Click:</strong> {{ (funnel.rates.apply_over_click * 100) | round(2) }}%</li>
+        <li><strong>Approve / Apply:</strong> {{ (funnel.rates.approve_over_apply * 100) | round(2) }}%</li>
+        <li><strong>Approve / Impression:</strong> {{ (funnel.rates.approve_over_impression * 100) | round(2) }}%</li>
+      </ul>
+
+      <div class="export-row">
+        <a class="btn secondary" href="{{ url_for('export_funnel') }}?{{ request.query_string.decode('utf-8') }}">Export Funnel CSV</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Baseline vs Test (lift)</h3>
+      {% if lift|length == 0 %}
+        <p class="muted">Need both <code>control</code> and <code>test</code> variants to compute lift.</p>
+      {% else %}
+        <table class="tbl">
+          <thead><tr><th>Metric</th><th>Control</th><th>Test</th><th>Lift</th></tr></thead>
+          <tbody>
+            {% for row in lift %}
+              <tr>
+                <td>{{ row.metric }}</td>
+                <td>{{ (row.control * 100) | round(2) }}%</td>
+                <td>{{ (row.test * 100) | round(2) }}%</td>
+                <td class="{% if row.lift_pct > 0 %}pos{% elif row.lift_pct < 0 %}neg{% endif %}">
+                  {{ (row.lift_pct * 100) | round(2) }}%
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="export-row">
+          <a class="btn secondary" href="{{ url_for('export_lift') }}?{{ request.query_string.decode('utf-8') }}">Export Lift CSV</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Daily trend</h3>
+    <div id="dailyChart" class="chart"></div>
+    <p class="hint">Metric shown: Approve / Impression (daily).</p>
+  </div>
+
+  <div class="card">
+    <h3>Anomaly check</h3>
+    {% if anomalies|length == 0 %}
+      <p class="muted">No anomalies detected.</p>
+    {% else %}
+      <table class="tbl">
+        <thead><tr><th>Date</th><th>Metric</th><th>Value</th><th>Z</th><th>Flag</th></tr></thead>
+        <tbody>
+          {% for a in anomalies %}
+            <tr>
+              <td>{{ a.date }}</td>
+              <td>{{ a.metric }}</td>
+              <td>{{ (a.value * 100) | round(3) }}%</td>
+              <td>{{ a.z | round(2) }}</td>
+              <td>{{ a.flag }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="hint">Lightweight z-score check (demo purpose).</p>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+  const daily = {{ daily | tojson }};
+  const x = daily.date || [];
+  const y = (daily.approve_rate_over_impression || []).map(v => v * 100);
+  const trace = { x, y, mode: "lines+markers", name: "Approve/Impression (%)" };
+  const layout = { margin: {l: 40, r: 10, t: 10, b: 40}, yaxis: { title: "Rate (%)" }, xaxis: { title: "Date" }, hovermode: "x unified" };
+  Plotly.newPlot("dailyChart", [trace], layout, {displayModeBar: false, responsive: true});
+</script>
+{% endblock %}

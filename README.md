@@ -1,2 +1,24 @@
-# rollout-analytics-dashboard
-Python + Flask dashboard to monitor rollout performance using funnel metrics, control vs test lift, and anomaly checks. Implemented CSV export for stakeholder reporting, interactive visualization with Plotly, and filterable breakdowns by channel/segment
+# Rollout Analytics Dashboard (Flask + Python + HTML/CSS)
+
+A modern, recruiter-friendly BA/Data Analyst portfolio project for monitoring rollout performance using funnel metrics, lift, and anomaly triage.
+
+## Screenshots
+![Dashboard](assets/dashboard.png)
+![Lift & Anomalies](assets/table.png)
+
+## What it does
+- Upload a CSV (or load included sample data)
+- Analyze a conversion funnel: **Impression → Click → Apply → Approve**
+- Compare **Control vs Test** (baseline vs rollout) and show lift
+- Flag abnormal daily movement with a simple anomaly check (z-score)
+- Visualize everything in a clean web dashboard (Plotly embedded in HTML)
+- Export reports as CSV (funnel + lift)
+
+## Quick start
+```bash
+python -m venv .venv
+source .venv/bin/activate   # macOS/Linux
+# .venv\Scripts\activate    # Windows PowerShell
+
+pip install -r requirements.txt
+python app.py

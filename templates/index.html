@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Modern BA / Analytics Portfolio Project</h1>
+  <p>Upload a CSV or load the sample dataset to demonstrate funnel analysis, baseline vs test comparisons, and anomaly triage.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Load sample data</h3>
+      <p>Instant demo with synthetic event data.</p>
+      <a class="btn" href="{{ url_for('load_sample') }}">Load Sample & Open Dashboard</a>
+    </div>
+
+    <div class="card">
+      <h3>Upload CSV</h3>
+      <p>Use your own data (same columns as sample).</p>
+      <form class="upload" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required>
+        <button class="btn secondary" type="submit">Upload & Open Dashboard</button>
+      </form>
+      <p class="hint">CSV columns: <code>date,user_id,variant,channel,segment,step</code></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

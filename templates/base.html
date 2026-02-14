@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title if title else "Rollout Analytics Dashboard" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <div class="brand">
+        <div class="logo">RA</div>
+        <div>
+          <div class="brand-title">Rollout Analytics Dashboard</div>
+          <div class="brand-sub">Python • Funnel monitoring • Baseline vs test • Anomaly triage</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span>Portfolio demo • Synthetic data • Flask + Pandas + Plotly</span>
+    </div>
+  </footer>
+</body>
+</html>
