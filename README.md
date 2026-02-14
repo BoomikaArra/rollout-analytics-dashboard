@@ -16,9 +16,11 @@ A modern, recruiter-friendly BA/Data Analyst portfolio project for monitoring ro
 
 ## Quick start
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate   # macOS/Linux
 # .venv\Scripts\activate    # Windows PowerShell
 
 pip install -r requirements.txt
 python app.py
+Open the local host URL on chrome web browser
+Upload the sample csv to use the dashboard
